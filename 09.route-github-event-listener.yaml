@@ -4,7 +4,7 @@ metadata:
   name: github-event-listener
   namespace: <namespace> #Reemplazar
 spec:
-  host: github-event-listener-<namespace>.apps.cluster-mvf62.mvf62.sandbox2472.opentlc.com #Reemplazar
+  host: github-event-listener-<namespace>.apps.<domain> #Reemplazar
   to:
     kind: Service
     name: el-github-event-listener

@@ -15,11 +15,11 @@ spec:
       spec:
         params:
           - name: GIT_APP_REPO
-            value: "https://github.com/luisfalero/code-with-quarkus-kcd.git"  #Reemplazar
+            value: "https://github.com/<username>/code-with-quarkus-kcd.git"  #Reemplazar
           - name: GIT_APP_REVISION
             value: $(tt.params.gitrevision-tag) #Este valor se pasará desde el trigger binding
           - name: GIT_MANIFEST_REPO
-            value: "https://github.com/luisfalero/code-with-quarkus-manifest-kcd.git"
+            value: "https://github.com/<username>/code-with-quarkus-manifest-kcd.git" #Reemplazar
           - name: GIT_MANIFEST_REVISION
             value: main
         pipelineRef:
