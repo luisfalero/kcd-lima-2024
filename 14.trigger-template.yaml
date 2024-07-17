@@ -1,0 +1,32 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: trigger-template
+  namespace: <namespace> #Reemplazar
+spec:
+  params:
+    - name: gitrevision-tag
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: quarkus-native-
+        namespace: <namespace> #Reemplazar
+      spec:
+        params:
+          - name: GIT_APP_REPO
+            value: "https://github.com/luisfalero/code-with-quarkus-kcd.git"  #Reemplazar
+          - name: GIT_APP_REVISION
+            value: $(tt.params.gitrevision-tag) #Este valor se pasará desde el trigger binding
+          - name: GIT_MANIFEST_REPO
+            value: "https://github.com/luisfalero/code-with-quarkus-manifest-kcd.git"
+          - name: GIT_MANIFEST_REVISION
+            value: main
+        pipelineRef:
+          name: quarkus-native
+        serviceAccountName: pipeline
+        timeout: 1h0m0s
+        workspaces:
+          - name: shared-workspace
+            persistentVolumeClaim:
+              claimName: quarkus-pvc

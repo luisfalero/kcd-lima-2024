@@ -1,0 +1,31 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: static-code
+  namespace: <namespace> #Reemplazar
+spec:
+  steps:
+    - name: run-static-code
+      image: image-registry.openshift-image-registry.svc:5000/openshift/java:openjdk-17-ubi8
+      script: >
+        ARTIFACTID=$(awk -F'[<>]' '/<artifactId>/{print $3; exit}' $(workspaces.shared-workspace.path)/pom.xml)
+
+        mvn clean verify sonar:sonar \
+          -Dsonar.projectKey=${ARTIFACTID} \
+          -Dsonar.host.url=${HOST} \
+          -Dsonar.token=${TOKEN} \
+          -Dsonar.coverage.jacoco.xmlReportPaths=target/jacoco-report/jacoco.xml
+      workingDir: $(workspaces.shared-workspace.path)
+      env:
+        - name: HOST
+          valueFrom:
+            secretKeyRef:
+              name: sonarqube-secret
+              key: host
+        - name: TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: sonarqube-secret
+              key: token
+  workspaces:
+    - name: shared-workspace

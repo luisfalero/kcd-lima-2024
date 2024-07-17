@@ -1,0 +1,31 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: Trigger
+metadata:
+  name: github-listener-trigger
+  namespace: <namespace> #Reemplazar
+spec:
+  interceptors:
+    - name: "verify-github-payload"
+      ref:
+        name: "github"
+        kind: ClusterInterceptor
+      params:
+        - name: secretRef
+          value:
+            secretName: "webhook-at-github"
+            secretKey: "secretToken"
+        - name: eventTypes
+          value:
+            - "push" #Para GitLab su "Push Hook" y "Tag Push Hook"
+    - name: "CEL filter: only when PRs are opened"
+      ref:
+        name: "cel" #CEL (Common Expression Language)
+      params:
+        - name: "overlays" #Define expresiones CEL para extraer y filtrar datos, en este caso, el nombre de la rama
+          value:
+            - key: branch_name
+              expression: "body.ref.split('/')[2]" #Aquí estamos dividiendo el body.ref ya que da como resultado "ref/head/<nombre de rama o etiqueta>" con "/" para buscar solo el nombre de la rama
+  bindings:
+    - ref: binding
+  template:
+    ref: trigger-template

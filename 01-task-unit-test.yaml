@@ -1,0 +1,14 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: unit-test
+  namespace: <namespace> #Reemplazar
+spec:
+  steps:
+    - name: run-unit-test
+      image: image-registry.openshift-image-registry.svc:5000/openshift/java:openjdk-17-ubi8
+      script: >
+        mvn test
+      workingDir: $(workspaces.shared-workspace.path)
+  workspaces:
+    - name: shared-workspace

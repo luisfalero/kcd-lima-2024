@@ -1,0 +1,62 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: update-manifest
+  namespace: <namespace> #Reemplazar
+spec:
+  params:
+    - name: URL
+      type: string
+    - name: REVISION
+      type: string
+  steps:
+    - image: docker.io/alpine/git:v2.30.2
+      name: run-git-update-manifest
+      script: >
+        git config --global --add http.sslVerify "false"
+
+        git config --global user.email "${EMAIL}"
+
+        git config --global user.name "${USER}"
+
+        DIRECTORY="$(workspaces.shared-workspace.path)/manifest"
+
+        if [ -d "${DIRECTORY}" ]; then rm -Rf "${DIRECTORY}"; fi
+
+        mkdir -p "${DIRECTORY}"
+
+        CLONE_URL=$(echo $(inputs.params.URL) | sed "s#https://#https://${PASSWORD}@#")
+
+        git clone -b "$(inputs.params.REVISION)" "${CLONE_URL}" "${DIRECTORY}"
+
+        chown -R 65532:10007500 "${DIRECTORY}"
+
+        cd "${DIRECTORY}"
+
+        VERSION=$(awk -F'[<>]' '/<version>/{print $3; exit}' $(workspaces.shared-workspace.path)/pom.xml)
+
+        sed -i "s|newTag: .*|newTag: ${VERSION}|" overlays/development/kustomization.yaml
+
+        git add .
+
+        git commit --allow-empty -m "[OpenShift Pipelines] Updating targetRevision to ${VERSION}"
+
+        git push -u origin "$(inputs.params.REVISION)"
+      env:
+        - name: USER
+          valueFrom:
+            secretKeyRef:
+              name: user-at-github
+              key: username
+        - name: PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: user-at-github
+              key: password
+        - name: EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: user-at-github
+              key: email
+  workspaces:
+    - name: shared-workspace

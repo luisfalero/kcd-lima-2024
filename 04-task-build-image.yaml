@@ -1,0 +1,43 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: build-image
+  namespace: <namespace> #Reemplazar
+spec:
+  params:
+    - default: ./src/main/docker/Dockerfile.native
+      description: Path to the Dockerfile to build.
+      name: DOCKERFILE
+      type: string
+  steps:
+    - name: build
+      image: quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21
+      script: >
+        ./mvnw clean package -Pnative
+      workingDir: $(workspaces.shared-workspace.path)
+
+    - name: buildah
+      image: registry.redhat.io/rhel8/buildah:8.10
+      securityContext:
+        capabilities:
+          add: ["SETFCAP"]
+      script: > #Reemplazar
+        ARTIFACTID=$(awk -F'[<>]' '/<artifactId>/{print $3; exit}' $(workspaces.shared-workspace.path)/pom.xml)
+
+        VERSION=$(awk -F'[<>]' '/<version>/{print $3; exit}' $(workspaces.shared-workspace.path)/pom.xml)
+
+        IMAGE=image-registry.openshift-image-registry.svc:5000/<namespace>/${ARTIFACTID}:${VERSION}
+
+        buildah --storage-driver=vfs bud \
+          --format=oci \
+          --tls-verify=true \
+          --no-cache \
+          -f "$(params.DOCKERFILE)" \
+          -t "${IMAGE}" .
+
+        buildah --storage-driver=vfs push \
+          --tls-verify=true \
+          ${IMAGE} docker://${IMAGE}
+      workingDir: $(workspaces.shared-workspace.path)
+  workspaces:
+    - name: shared-workspace

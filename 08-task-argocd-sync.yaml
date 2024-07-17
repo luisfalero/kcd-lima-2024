@@ -1,0 +1,26 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: argocd-sync
+  namespace: <namespace> #Reemplazar
+spec:
+  steps:
+    - image: quay.io/argoproj/argocd:v2.2.2
+      name: run-argocd-sync
+      script: >
+        ARTIFACTID=$(awk -F'[<>]' '/<artifactId>/{print $3; exit}' $(workspaces.shared-workspace.path)/pom.xml)
+
+        argocd app sync "${ARTIFACTID}" --auth-token ${TOKEN} --server ${SERVER} --insecure --grpc-web
+      env:
+        - name: TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: argocd-secret
+              key: token
+        - name: SERVER
+          valueFrom:
+            secretKeyRef:
+              name: argocd-secret
+              key: server
+  workspaces:
+    - name: shared-workspace
