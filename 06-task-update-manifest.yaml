@@ -2,7 +2,6 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: update-manifest
-  namespace: <namespace> #Reemplazar
 spec:
   params:
     - name: URL

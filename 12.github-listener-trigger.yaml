@@ -2,7 +2,6 @@ apiVersion: triggers.tekton.dev/v1beta1
 kind: Trigger
 metadata:
   name: github-listener-trigger
-  namespace: <namespace> #Reemplazar
 spec:
   interceptors:
     - name: "verify-github-payload"

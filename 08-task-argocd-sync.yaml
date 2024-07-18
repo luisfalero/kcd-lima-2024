@@ -2,7 +2,6 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: argocd-sync
-  namespace: <namespace> #Reemplazar
 spec:
   steps:
     - image: quay.io/argoproj/argocd:v2.2.2

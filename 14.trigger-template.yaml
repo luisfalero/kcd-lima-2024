@@ -2,7 +2,6 @@ apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerTemplate
 metadata:
   name: trigger-template
-  namespace: <namespace> #Reemplazar
 spec:
   params:
     - name: gitrevision-tag

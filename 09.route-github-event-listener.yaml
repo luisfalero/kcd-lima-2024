@@ -2,7 +2,6 @@ kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
   name: github-event-listener
-  namespace: <namespace> #Reemplazar
 spec:
   host: github-event-listener-<namespace>.apps.<domain> #Reemplazar
   to:
