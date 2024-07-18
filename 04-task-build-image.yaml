@@ -8,7 +8,7 @@ spec:
       description: Path to the Dockerfile to build.
       name: DOCKERFILE
       type: string
-    - description: Namespace
+    - description: Namespace of user
       name: NAMESPACE
       type: string
   steps:
