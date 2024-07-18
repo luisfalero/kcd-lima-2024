@@ -8,6 +8,9 @@ spec:
       description: Path to the Dockerfile to build.
       name: DOCKERFILE
       type: string
+    - description: Namespace
+      name: NAMESPACE
+      type: string
   steps:
     - name: build
       image: quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21
@@ -25,7 +28,7 @@ spec:
 
         VERSION=$(awk -F'[<>]' '/<version>/{print $3; exit}' $(workspaces.shared-workspace.path)/pom.xml)
 
-        IMAGE=image-registry.openshift-image-registry.svc:5000/<namespace>/${ARTIFACTID}:${VERSION}
+        IMAGE=image-registry.openshift-image-registry.svc:5000/"$(params.NAMESPACE)" /${ARTIFACTID}:${VERSION}
 
         buildah --storage-driver=vfs bud \
           --format=oci \
