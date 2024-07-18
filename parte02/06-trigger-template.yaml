@@ -10,7 +10,6 @@ spec:
       kind: PipelineRun
       metadata:
         generateName: quarkus-native-
-        namespace: <namespace> #Reemplazar
       spec:
         params:
           - name: GIT_APP_REPO

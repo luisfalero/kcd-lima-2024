@@ -1,0 +1,115 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: quarkus-native
+spec:
+  params:
+    - default: "https://github.com/<username>/code-with-quarkus-kcd.git" #Reemplazar
+      name: GIT_APP_REPO
+      type: string
+    - default: main
+      name: GIT_APP_REVISION
+      type: string
+    - default: "https://github.com/<username>/code-with-quarkus-manifest-kcd.git" #Reemplazar
+      name: GIT_MANIFEST_REPO
+      type: string
+    - default: main
+      name: GIT_MANIFEST_REVISION
+      type: string
+  tasks:
+    - name: unit-test
+      runAfter:
+        - git-clone-app
+      taskRef:
+        kind: Task
+        name: unit-test
+      workspaces:
+        - name: shared-workspace
+          workspace: shared-workspace
+    - name: static-code
+      runAfter:
+        - unit-test
+      taskRef:
+        kind: Task
+        name: static-code
+      workspaces:
+        - name: shared-workspace
+          workspace: shared-workspace
+    - name: build-image
+      params:
+        - name: DOCKERFILE
+          value: ./src/main/docker/Dockerfile.native
+      runAfter:
+        - static-code
+      taskRef:
+        kind: Task
+        name: build-image
+      workspaces:
+        - name: shared-workspace
+          workspace: shared-workspace
+    - name: update-manifest
+      params:
+        - name: URL
+          value: $(params.GIT_MANIFEST_REPO)
+        - name: REVISION
+          value: $(params.GIT_MANIFEST_REVISION)
+      runAfter:
+        - build-image
+      taskRef:
+        kind: Task
+        name: update-manifest
+      workspaces:
+        - name: shared-workspace
+          workspace: shared-workspace
+    - name: argocd-sync
+      runAfter:
+        - update-manifest
+      taskRef:
+        kind: Task
+        name: argocd-sync
+      workspaces:
+        - name: shared-workspace
+          workspace: shared-workspace
+    - name: git-clone-app
+      params:
+        - name: url
+          value: $(params.GIT_APP_REPO)
+        - name: revision
+          value: $(params.GIT_APP_REVISION)
+        - name: refspec
+          value: ""
+        - name: submodules
+          value: "true"
+        - name: depth
+          value: "1"
+        - name: sslVerify
+          value: "true"
+        - name: crtFileName
+          value: ca-bundle.crt
+        - name: subdirectory
+          value: ""
+        - name: sparseCheckoutDirectories
+          value: ""
+        - name: deleteExisting
+          value: "true"
+        - name: httpProxy
+          value: ""
+        - name: httpsProxy
+          value: ""
+        - name: noProxy
+          value: ""
+        - name: verbose
+          value: "true"
+        - name: gitInitImage
+          value: >-
+            registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:681dc67d2aa1dbecbf65ecd229c8b181dae533bf14b07543c1aeead36aed2198
+        - name: userHome
+          value: /home/git
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+  workspaces:
+    - name: shared-workspace

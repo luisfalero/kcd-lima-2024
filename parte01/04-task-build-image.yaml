@@ -8,9 +8,6 @@ spec:
       description: Path to the Dockerfile to build.
       name: DOCKERFILE
       type: string
-    - description: Namespace of user
-      name: NAMESPACE
-      type: string
   steps:
     - name: build
       image: quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21
@@ -23,12 +20,12 @@ spec:
       securityContext:
         capabilities:
           add: ["SETFCAP"]
-      script: >
+      script: > #Reemplazar
         ARTIFACTID=$(awk -F'[<>]' '/<artifactId>/{print $3; exit}' $(workspaces.shared-workspace.path)/pom.xml)
 
         VERSION=$(awk -F'[<>]' '/<version>/{print $3; exit}' $(workspaces.shared-workspace.path)/pom.xml)
 
-        IMAGE=image-registry.openshift-image-registry.svc:5000/"$(params.NAMESPACE)" /${ARTIFACTID}:${VERSION}
+        IMAGE=image-registry.openshift-image-registry.svc:5000/<namespace>/${ARTIFACTID}:${VERSION}
 
         buildah --storage-driver=vfs bud \
           --format=oci \
