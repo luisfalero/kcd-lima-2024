@@ -3,7 +3,7 @@ apiVersion: route.openshift.io/v1
 metadata:
   name: github-event-listener
 spec:
-  host: github-event-listener-<namespace>.apps.cluster-rg6x8.rg6x8.sandbox735.opentlc.com #Reemplazar
+  host: github-event-listener-<namespace>.apps.cluster-mvf62.mvf62.sandbox2472.opentlc.com #Reemplazar
   to:
     kind: Service
     name: el-github-event-listener

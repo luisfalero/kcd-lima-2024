@@ -14,4 +14,4 @@ else
     echo $0" <Namespace> <User Git>"
 fi
 
-#./trigger.sh "kcd40" "luisfalero"
+#./trigger.sh "kcd45" "luisfalero"

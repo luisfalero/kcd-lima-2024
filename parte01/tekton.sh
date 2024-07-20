@@ -19,4 +19,4 @@ else
     echo $0" <Namespace> <User Git> <Password Git> <Email Git>"
 fi
 
-#./tekton.sh "kcd40" "luisfalero" "ghp_VMDv8GdDP...." "lufao1427@gmail.com"
+#./tekton.sh "kcd45" "luisfalero" "ghp_VMDv8GdDP...." "lufao1427@gmail.com"
